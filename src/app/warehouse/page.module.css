@@ -1,0 +1,143 @@
+.warehousePage {
+  display: flex;
+  height: calc(100vh - 64px - var(--space-16));
+  position: relative;
+  gap: var(--space-6);
+}
+
+.mapContainer {
+  flex: 1;
+  background-color: var(--color-surface-low);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 2px 20px rgba(0,0,0,0.02);
+}
+
+.mapImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.6;
+}
+
+.mapSvgOverlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.routeLine {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 3;
+  stroke-linecap: round;
+  filter: drop-shadow(0 2px 4px rgba(0, 91, 191, 0.3));
+}
+
+.routeLineWarning {
+  stroke: var(--color-error);
+  filter: drop-shadow(0 2px 4px rgba(186, 26, 26, 0.3));
+}
+
+.pin {
+  position: absolute;
+  z-index: 20;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.pinIcon {
+  width: 32px;
+  height: 32px;
+  background-color: var(--color-primary);
+  color: white;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-hover);
+  border: 2px solid white;
+  transition: transform 0.2s ease-out;
+}
+
+.pinIcon:hover {
+  transform: scale(1.1);
+}
+
+.pinWarning .pinIcon {
+  background-color: var(--color-error);
+}
+
+.pinSecondary .pinIcon {
+  background-color: var(--color-secondary);
+}
+
+.panel {
+  width: 360px;
+  background-color: var(--color-surface-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panelHeader {
+  padding: var(--space-4) var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.panelTitle {
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: -0.02em;
+}
+
+.panelContent {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.listCard {
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  transition: all 0.2s ease-out;
+  cursor: pointer;
+}
+
+.listCard:hover {
+  background-color: var(--color-surface-low);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-nav);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-2);
+}
+
+.cardTitle {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.cardSubtitle {
+  font-size: 0.75rem;
+  color: var(--color-text-tertiary);
+}
