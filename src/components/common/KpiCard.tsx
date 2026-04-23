@@ -5,11 +5,10 @@ import styles from './KpiCard.module.css';
 import { LucideIcon, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { useAnimateNumbers } from '@/hooks/useAnimations';
 
-export type KpiColorType = 'primary' | 'secondary' | 'warning' | 'error';
-
+import { KpiColorType } from '@/types/common';
 interface KpiCardProps {
   title: string;
-  value: number;
+  value: number | string;
   prefix?: string;
   suffix?: string;
   icon: LucideIcon;
@@ -33,7 +32,8 @@ export const KpiCard = ({
 }: KpiCardProps) => {
   const numRef = useRef<HTMLSpanElement>(null);
   
-  useAnimateNumbers(numRef, value, suffix);
+  const animateTarget = typeof value === 'number' ? value : 0;
+  useAnimateNumbers(numRef, animateTarget, suffix);
 
   const iconClass = styles[`${colorType}Icon`];
   
@@ -62,7 +62,11 @@ export const KpiCard = ({
           <div className={styles.title}>{title}</div>
           <div className={styles.valueContainer}>
             {prefix && <span style={{ fontSize: '1.2rem', fontWeight: 600 }}>{prefix}</span>}
-            <span className={styles.value} ref={numRef}>0{suffix}</span>
+            {typeof value === 'number' ? (
+              <span className={styles.value} ref={numRef}>0{suffix}</span>
+            ) : (
+              <span className={styles.value} style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{value}{suffix}</span>
+            )}
           </div>
         </div>
         <div className={`${styles.iconWrapper} ${iconClass}`}>
