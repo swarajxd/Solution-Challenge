@@ -10,8 +10,12 @@
 }
 
 .card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-4px) scale(1.02);
   box-shadow: var(--shadow-hover);
+}
+
+.card:active {
+  transform: scale(0.97);
 }
 
 .header {

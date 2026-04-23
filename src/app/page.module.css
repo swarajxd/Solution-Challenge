@@ -80,3 +80,13 @@
   height: 300px;
   width: 100%;
 }
+
+.tableRow {
+  border-bottom: 1px solid var(--color-surface-low);
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.tableRow:hover {
+  background-color: var(--color-surface-bg);
+  cursor: pointer;
+}
