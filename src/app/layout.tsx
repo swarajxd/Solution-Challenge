@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { NexusProvider } from "@/context/NexusContext";
+import { NotificationProvider } from "@/context/NotificationContext";
 import { ToastContainer } from "@/components/common/ToastContainer";
 export const metadata: Metadata = {
   title: "Nexus Supply Dashboard",
@@ -17,8 +18,10 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <NexusProvider>
-          <MainLayout>{children}</MainLayout>
-          <ToastContainer />
+          <NotificationProvider>
+            <MainLayout>{children}</MainLayout>
+            <ToastContainer />
+          </NotificationProvider>
         </NexusProvider>
       </body>
     </html>
