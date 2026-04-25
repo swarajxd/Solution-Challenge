@@ -106,7 +106,7 @@ export default function DashboardPage() {
                   }} 
                 />
                 <Area type="monotone" dataKey="actual" stroke="var(--color-primary)" strokeWidth={3} fillOpacity={1} fill="url(#colorActual)" animationDuration={1500} />
-                <Area type="monotone" dataKey="predicted" stroke="var(--color-primary-light)" strokeWidth={2} strokeDasharray="5 5" fillOpacity={0} animationDuration={1500} delay={300} />
+                <Area type="monotone" dataKey="predicted" stroke="var(--color-primary-light)" strokeWidth={2} strokeDasharray="5 5" fillOpacity={0} animationDuration={1500} />
               </AreaChart>
             </ResponsiveContainer>
           </div>

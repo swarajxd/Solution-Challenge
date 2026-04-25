@@ -93,7 +93,7 @@ export default function SustainabilityPage() {
                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--color-text-tertiary)' }} />
                 <Tooltip contentStyle={{ borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-hover)' }} />
                 <Area type="monotone" dataKey="emitted" stroke="var(--color-error)" strokeWidth={2} fillOpacity={1} fill="url(#colorEmit)" animationDuration={1500} />
-                <Area type="monotone" dataKey="offset" stroke="var(--color-secondary)" strokeWidth={3} fillOpacity={1} fill="url(#colorOffset)" animationDuration={1500} delay={300} />
+                <Area type="monotone" dataKey="offset" stroke="var(--color-secondary)" strokeWidth={3} fillOpacity={1} fill="url(#colorOffset)" animationDuration={1500} />
               </AreaChart>
             </ResponsiveContainer>
           </div>

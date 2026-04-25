@@ -94,7 +94,7 @@ export default function ForecastingPage() {
                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--color-text-tertiary)' }} />
                 <Tooltip contentStyle={{ borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-hover)' }} />
                 <Area type="monotone" dataKey="q3" stroke="var(--color-text-tertiary)" fillOpacity={1} fill="url(#colorQ3)" animationDuration={1500} />
-                <Area type="monotone" dataKey="q4_sim" stroke="var(--color-primary)" strokeWidth={3} fillOpacity={1} fill="url(#colorQ4)" animationDuration={1500} delay={400} />
+                <Area type="monotone" dataKey="q4_sim" stroke="var(--color-primary)" strokeWidth={3} fillOpacity={1} fill="url(#colorQ4)" animationDuration={1500} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
