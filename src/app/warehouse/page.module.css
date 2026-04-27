@@ -1,27 +1,25 @@
 .warehousePage {
   display: flex;
-  height: calc(100vh - 64px - var(--space-16));
+  height: calc(100vh - var(--header-height, 60px));
+  width: 100%;
   position: relative;
-  gap: var(--space-6);
+  overflow: hidden;
+  background: var(--color-background);
 }
 
 .mapContainer {
   flex: 1;
-  background-color: var(--color-surface-low);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
   position: relative;
+  background: #111;
   overflow: hidden;
-  box-shadow: inset 0 2px 20px rgba(0,0,0,0.02);
 }
 
 .mapImage {
-  position: absolute;
-  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0.6;
+  opacity: 0.5;
+  filter: grayscale(100%) contrast(1.2);
 }
 
 .mapSvgOverlay {
@@ -29,115 +27,228 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  z-index: 10;
   pointer-events: none;
 }
 
 .routeLine {
   fill: none;
-  stroke: var(--color-primary);
-  stroke-width: 3;
-  stroke-linecap: round;
-  filter: drop-shadow(0 2px 4px rgba(0, 91, 191, 0.3));
+  stroke: var(--color-secondary);
+  stroke-width: 2;
+  stroke-dasharray: 8 8;
+  opacity: 0.4;
+  animation: march 20s linear infinite;
 }
 
 .routeLineWarning {
   stroke: var(--color-error);
-  filter: drop-shadow(0 2px 4px rgba(186, 26, 26, 0.3));
+  animation-duration: 5s;
+  opacity: 0.8;
+}
+
+@keyframes march {
+  from { stroke-dashoffset: 1000; }
+  to { stroke-dashoffset: 0; }
 }
 
 .pin {
   position: absolute;
-  z-index: 20;
   transform: translate(-50%, -50%);
   cursor: pointer;
-  pointer-events: auto;
+  z-index: 10;
+  transition: transform 0.2s, z-index 0.2s;
+  color: var(--color-primary);
+}
+
+.pin:hover {
+  transform: translate(-50%, -50%) scale(1.2);
+  z-index: 20;
 }
 
 .pinIcon {
-  width: 32px;
-  height: 32px;
-  background-color: var(--color-primary);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: currentColor;
   color: white;
-  border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: var(--shadow-hover);
-  border: 2px solid white;
-  transition: transform 0.2s ease-out;
+  box-shadow: 0 0 10px currentColor;
 }
 
-.pinIcon:hover {
-  transform: scale(1.1);
+/* Data-driven Pulse Animations */
+.pulse-red {
+  color: var(--color-error);
+}
+.pulse-red::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  background: var(--color-error);
+  opacity: 0.2;
+  animation: pulse 1.2s ease-out infinite;
+  z-index: -1;
+  pointer-events: none;
 }
 
-.pinWarning .pinIcon {
-  background-color: var(--color-error);
+.pulse-yellow {
+  color: var(--color-warning);
+}
+.pulse-yellow::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  background: var(--color-warning);
+  opacity: 0.2;
+  animation: pulse 1.5s ease-out infinite;
+  z-index: -1;
+  pointer-events: none;
 }
 
-.pinSecondary .pinIcon {
-  background-color: var(--color-secondary);
+.pulse-green {
+  color: var(--color-secondary);
+}
+.pulse-green::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  background: var(--color-secondary);
+  opacity: 0.2;
+  animation: pulse 2s ease-out infinite;
+  z-index: -1;
+  pointer-events: none;
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.5); opacity: 0.8; }
+  100% { transform: scale(2); opacity: 0; }
 }
 
 .panel {
-  width: 360px;
-  background-color: var(--color-surface-card);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-card);
+  width: 380px;
+  background: var(--color-surface-card);
+  border-left: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  z-index: 30;
+  box-shadow: -4px 0 20px rgba(0,0,0,0.05);
 }
 
 .panelHeader {
-  padding: var(--space-4) var(--space-6);
+  padding: 24px;
   border-bottom: 1px solid var(--color-border);
 }
 
 .panelTitle {
-  font-weight: 700;
-  font-size: 1.1rem;
-  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
 }
 
 .panelContent {
   flex: 1;
   overflow-y: auto;
-  padding: var(--space-4);
+  padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: 24px;
 }
 
 .listCard {
-  padding: var(--space-4);
-  border-radius: var(--radius-md);
+  background: var(--color-surface-card);
   border: 1px solid var(--color-border);
-  transition: all 0.2s ease-out;
+  border-radius: var(--radius-md);
+  padding: 16px;
+  transition: transform 0.2s, box-shadow 0.2s;
   cursor: pointer;
 }
 
 .listCard:hover {
-  background-color: var(--color-surface-low);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-nav);
+  box-shadow: var(--shadow-hover);
 }
 
 .cardHeader {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-2);
+  align-items: flex-start;
+  margin-bottom: 8px;
 }
 
 .cardTitle {
-  font-weight: 600;
-  font-size: 0.9rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--color-text-primary);
 }
 
 .cardSubtitle {
-  font-size: 0.75rem;
-  color: var(--color-text-tertiary);
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
 }
+
+.utilizationBar {
+  height: 6px;
+  background: var(--color-surface-low);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.utilizationFill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.riskContainer {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.riskItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.riskLabel {
+  font-size: 0.65rem;
+  color: var(--color-text-tertiary);
+  margin-bottom: 2px;
+}
+
+.riskValue {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.alertBox {
+  margin-top: 12px;
+  padding: 12px;
+  background: rgba(186, 26, 26, 0.05);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--color-error);
+  font-size: 0.75rem;
+  color: var(--color-error);
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+.selectedCard {
+  border: 2px solid var(--color-primary);
+  box-shadow: 0 0 15px rgba(0, 91, 191, 0.1);
+}
+

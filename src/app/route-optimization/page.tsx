@@ -1,129 +1,275 @@
 "use client";
 
 import React, { useRef } from 'react';
-import styles from '../page.module.css';
-import { Route, Navigation, Timer, Leaf, Zap, ChevronRight, CheckCircle2 } from 'lucide-react';
+import {
+  Route, Navigation, Timer, Leaf, Zap, ChevronRight,
+  CheckCircle2, Loader2, Circle, MapPin, Fuel,
+} from 'lucide-react';
 import { KpiCard } from '@/components/common/KpiCard';
 import { useAnimateCards } from '@/hooks/useAnimations';
+import {
+  ResponsiveContainer, LineChart, Line, XAxis, YAxis,
+  CartesianGrid, Tooltip, Legend, BarChart, Bar,
+} from 'recharts';
+import {
+  routeOptimizationKPIs,
+  optimizedRoutes,
+  fuelMetrics,
+  carbonMetrics,
+  carbonSummary,
+  predictiveInsights,
+  type RouteLeg,
+} from '@/data/dashboardData';
+import { useApp } from '@/context/AppContext';
+import { useNexusContext } from '@/context/NexusContext';
+import { useNotificationContext } from '@/context/NotificationContext';
+import styles from './page.module.css';
+
+// Icon lookup for KPI cards
+const kpiIconMap: any = {
+  Fuel, Timer, Leaf, MapPin,
+};
+
+// Per-leg status styling
+const legStatusIcon: Record<RouteLeg['status'], React.ReactNode> = {
+  'completed':   <CheckCircle2 size={20} color="var(--color-secondary)" />,
+  'in-progress': <Loader2 size={20} color="var(--color-primary)" style={{ animation: 'spin 1.5s linear infinite' }} />,
+  'pending':     <Circle size={20} color="var(--color-text-tertiary)" />,
+};
+
+const trafficColor: Record<RouteLeg['trafficCondition'], string> = {
+  Clear:    'var(--color-secondary)',
+  Moderate: 'var(--color-warning)',
+  Heavy:    'var(--color-error)',
+  Closed:   '#000',
+};
+
+const routeInsight = predictiveInsights.find(i => i.affectedRoute === 'ROUTE-001');
+const route = optimizedRoutes[0];
 
 export default function RouteOptimizationPage() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { routeKpis, setRouteKpis, kpis, setKpis } = useApp() as any;
+  const { addNotification } = useNotificationContext();
+  const [isApplying, setIsApplying] = React.useState(false);
+  const [isOptimized, setIsOptimized] = React.useState(false);
+  const [recommendationDismissed, setRecommendationDismissed] = React.useState(false);
+
   useAnimateCards(containerRef);
+
+  const handleApplyRecommendation = () => {
+    setIsApplying(true);
+    
+    // Simulate API call
+    setTimeout(() => {
+      // 1. Update Route KPIs to show improvement
+      const updatedRouteKpis = routeKpis.map((kpi: any) => {
+        if (kpi.id === 'fuel-consumption') return { ...kpi, value: 162.1, trend: -24.4 };
+        if (kpi.id === 'estimated-time') return { ...kpi, value: 4.1, trend: -28.6 };
+        if (kpi.id === 'carbon-footprint') return { ...kpi, value: 0.68, trend: -32.1 };
+        return kpi;
+      });
+      setRouteKpis(updatedRouteKpis);
+
+      // 2. Update Global Dashboard KPIs (impact on enterprise level)
+      const updatedGlobalKpis = kpis.map((kpi: any) => {
+        if (kpi.id === 'delivery-performance') return { ...kpi, value: 98.2, trend: 3.4 };
+        if (kpi.id === 'total-shipments') return { ...kpi, value: kpi.value + 42 };
+        return kpi;
+      });
+      setKpis(updatedGlobalKpis);
+      
+      // 3. Trigger Notification with correct parameters
+      addNotification(
+        'Route optimization applied! Estimated efficiency increased by 14.3% across the fleet.', 
+        'success',
+        'ai'
+      );
+
+      setIsOptimized(true);
+      setRecommendationDismissed(true);
+      setIsApplying(false);
+    }, 1500);
+  };
 
   return (
     <div className={styles.dashboard} ref={containerRef}>
+      {/* ── Header ── */}
       <div className={styles.header}>
         <div>
           <h1 className={styles.title}>Route Optimization</h1>
-          <p className={styles.subtitle}>Chicago Regional Distribution Hub • Fleet ID: NEX-882</p>
+          <p className={styles.subtitle}>
+            {route.originHub} → {route.destinationHub} · Fleet {route.fleetId} · {route.totalMiles.toLocaleString()} mi
+          </p>
         </div>
-        <button className="gsap-card" style={{ 
-          backgroundColor: 'var(--color-primary)', 
-          color: 'white', 
-          padding: '12px 24px', 
-          borderRadius: 'var(--radius-full)', 
-          fontWeight: 'bold', 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: '8px',
-          border: 'none',
-          boxShadow: '0 4px 15px rgba(0,91,191,0.2)',
-          cursor: 'pointer'
-        }}>
-          <Zap size={18} /> Optimize Route
+        <button 
+          className={styles.reoptimizeButton}
+          onClick={handleApplyRecommendation}
+          disabled={isApplying}
+        >
+          {isApplying ? <Loader2 className="spin" size={18} /> : <Zap size={18} />}
+          {isApplying ? 'Optimizing...' : 'Re-Optimize'}
         </button>
       </div>
 
+      {/* ── KPIs from global state ── */}
       <div className={styles.kpiGrid}>
-        <KpiCard 
-          title="Fuel Consumption" 
-          value={184.2} 
-          suffix=" Gal"
-          icon={Route} 
-          colorType="primary"
-          trend={-12.4} 
-          trendLabel="vs Current"
-        />
-        <KpiCard 
-          title="Estimated Time" 
-          value={4.8} 
-          suffix=" Hours"
-          icon={Timer} 
-          colorType="secondary"
-          trend={-42} 
-          trendLabel="mins reduced"
-        />
-        <KpiCard 
-          title="Carbon Footprint" 
-          value={0.82} 
-          suffix=" Tons"
-          icon={Leaf} 
-          colorType="warning"
-          trend={-15} 
-          trendLabel="CO2e reduction"
-        />
+        {routeKpis.map((kpi: any) => {
+          const Icon = kpiIconMap[kpi.iconName] ?? Route;
+          return (
+            <KpiCard
+              key={kpi.id}
+              title={kpi.title}
+              value={kpi.value}
+              suffix={kpi.suffix}
+              icon={Icon}
+              colorType={kpi.colorType}
+              trend={kpi.trend}
+              trendLabel={kpi.trendLabel}
+              chartData={kpi.chartData}
+            />
+          );
+        })}
       </div>
 
+      {/* ── Charts Row ── */}
       <div className={styles.chartsGrid}>
-        <div className={`gsap-card ${styles.chartCard} ${styles.fullWidth}`} style={{ gridColumn: '1 / -1' }}>
-          <h2 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '24px' }}>Optimized Journey Breakdown</h2>
-          
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {/* Leg 1 */}
-            <div style={{ backgroundColor: 'var(--color-surface-low)', padding: '24px', borderRadius: 'var(--radius-md)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid var(--color-border)' }}>
-              <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
-                <div style={{ width: '32px', height: '32px', backgroundColor: 'var(--color-primary)', color: 'white', borderRadius: 'var(--radius-full)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>1</div>
-                <div>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Central Hub → O'Hare Logipark</h3>
-                  <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
-                    <Navigation size={14} /> 12.4 Miles • Heavy Traffic Alert
-                  </p>
-                  <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                    <span style={{ padding: '4px 12px', backgroundColor: 'var(--color-surface-card)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-full)', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase' }}>Express Toll</span>
-                    <span style={{ padding: '4px 12px', backgroundColor: 'var(--color-surface-card)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-full)', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase' }}>Priority Loading</span>
-                  </div>
-                </div>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: '1.2rem', fontWeight: 900 }}>09:45 AM</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--color-text-tertiary)' }}>Scheduled ETA</div>
-                <ChevronRight size={20} color="var(--color-text-secondary)" style={{ marginTop: '16px' }} />
-              </div>
-            </div>
-
-            {/* Leg 2 */}
-            <div style={{ backgroundColor: 'var(--color-surface-low)', padding: '24px', borderRadius: 'var(--radius-md)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid var(--color-border)' }}>
-              <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
-                <div style={{ width: '32px', height: '32px', backgroundColor: 'var(--color-primary)', color: 'white', borderRadius: 'var(--radius-full)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>2</div>
-                <div>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>O'Hare Logipark → Michigan Ave Hub</h3>
-                  <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
-                    <Navigation size={14} /> 8.1 Miles • Rerouted for Efficiency
-                  </p>
-                  <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                    <span style={{ padding: '4px 12px', backgroundColor: 'rgba(0, 110, 44, 0.1)', color: 'var(--color-secondary)', borderRadius: 'var(--radius-full)', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase' }}>Low Emission Zone</span>
-                  </div>
-                </div>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: '1.2rem', fontWeight: 900 }}>11:20 AM</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--color-text-tertiary)' }}>Scheduled ETA</div>
-                <ChevronRight size={20} color="var(--color-text-secondary)" style={{ marginTop: '16px' }} />
-              </div>
-            </div>
-            
-            {/* AI Insight Board */}
-            <div style={{ backgroundColor: 'var(--color-surface-lowest)', padding: '24px', borderRadius: 'var(--radius-md)', borderLeft: '4px solid var(--color-primary)', marginTop: '16px' }}>
-              <h3 style={{ fontSize: '1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}><Zap size={18} color="var(--color-primary)" /> Predictive Insight</h3>
-              <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem', lineHeight: 1.6 }}>Traffic patterns suggest a 22% increase in congestion on I-94 between 3:00 PM and 5:00 PM. Our model recommends shifting Leg 3 departure to 1:45 PM to save an additional 15 minutes and 1.2 gallons of fuel.</p>
-              <div style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>
-                 <p style={{ color: 'var(--color-primary)', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>Apply Recommendation</p>
-                 <p style={{ color: 'var(--color-text-tertiary)', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>Dismiss</p>
-              </div>
-            </div>
-
+        {/* Fuel: Consumed vs Optimized */}
+        <div className={`gsap-card ${styles.chartCard}`}>
+          <div className={styles.chartHeader}>
+            <h3 className={styles.chartTitle}>Fuel Consumption Trend</h3>
+            <p className={styles.chartSubtitle}>Monthly actual vs. optimized route fuel usage (gallons).</p>
+          </div>
+          <div className={styles.chartContainer}>
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={fuelMetrics} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--color-text-tertiary)' }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--color-text-tertiary)' }} />
+                <Tooltip
+                  contentStyle={{ borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-hover)', fontSize: '0.85rem' }}
+                />
+                <Legend wrapperStyle={{ fontSize: '0.8rem', paddingTop: '12px' }} />
+                <Line type="monotone" dataKey="consumed"  name="Actual (gal)"    stroke="var(--color-error)"     strokeWidth={2.5} dot={false} animationDuration={1500} />
+                <Line type="monotone" dataKey="optimized" name="Optimized (gal)" stroke="var(--color-secondary)" strokeWidth={2.5} dot={false} strokeDasharray="5 5" animationDuration={1800} />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
         </div>
+
+        {/* Carbon Emissions vs Target */}
+        <div className={`gsap-card ${styles.chartCard}`}>
+          <div className={styles.chartHeader}>
+            <h3 className={styles.chartTitle}>Carbon Footprint</h3>
+            <p className={styles.chartSubtitle}>Emissions vs. monthly target (tons CO₂e).</p>
+          </div>
+          <div className={styles.chartContainer}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={carbonMetrics} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--color-text-tertiary)' }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--color-text-tertiary)' }} unit="t" />
+                <Tooltip
+                  contentStyle={{ borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-hover)', fontSize: '0.85rem' }}
+                />
+                <Legend wrapperStyle={{ fontSize: '0.8rem', paddingTop: '12px' }} />
+                <Bar dataKey="emissions" name="Emissions (t)" fill="var(--color-warning)" radius={[4,4,0,0]} barSize={16} animationDuration={1000} />
+                <Bar dataKey="target"    name="Target (t)"    fill="var(--color-primary-light)" radius={[4,4,0,0]} barSize={16} animationDuration={1200} />
+                <Bar dataKey="offset"    name="Offset (t)"    fill="var(--color-secondary)" radius={[4,4,0,0]} barSize={16} animationDuration={1400} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Journey & Recommendation Row ── */}
+      <div className={styles.journeyContainer}>
+        <div className={styles.journeyList}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Journey Breakdown</h2>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <span className={styles.tag}>{route.totalLegs} Legs</span>
+              <span className={styles.tag}>{route.totalMiles} Total Miles</span>
+            </div>
+          </div>
+
+          {route.legs.map((leg) => (
+            <div key={leg.legNumber} className={styles.legCard}>
+              <div className={styles.legInfo}>
+                <div className={styles.legStepNumber} style={{
+                  backgroundColor: leg.status === 'completed' ? 'var(--color-secondary)' : leg.status === 'in-progress' ? 'var(--color-primary)' : 'var(--color-surface-low)',
+                  color: leg.status === 'pending' ? 'var(--color-text-tertiary)' : 'white',
+                  border: leg.status === 'pending' ? '2px dashed var(--color-border)' : 'none',
+                }}>
+                  {leg.status === 'completed' ? <CheckCircle2 size={18} /> : leg.legNumber}
+                </div>
+
+                <div className={styles.legDetails}>
+                  <h3>{leg.from} → {leg.to}</h3>
+                  <div className={styles.legMeta}>
+                    <Navigation size={14} />
+                    <span>{leg.distanceMiles} mi</span>
+                    <span style={{ color: 'var(--color-border-hover)' }}>|</span>
+                    <span style={{ color: trafficColor[leg.trafficCondition], fontWeight: 700 }}>
+                      {leg.trafficCondition} Traffic
+                    </span>
+                  </div>
+                  <div className={styles.tagContainer}>
+                    {leg.tags.map(tag => <span key={tag} className={styles.tag}>{tag}</span>)}
+                    {isOptimized && <span className={styles.tag} style={{ color: 'var(--color-secondary)', borderColor: 'var(--color-secondary)' }}>Optimized</span>}
+                  </div>
+                </div>
+              </div>
+
+              <div className={styles.etaContainer}>
+                <div className={styles.etaLabel}>Scheduled ETA</div>
+                <div className={styles.etaTime}>{leg.scheduledETA}</div>
+                <div style={{ marginTop: '12px' }}>{legStatusIcon[leg.status]}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* ── AI Recommendation Panel ── */}
+        {!recommendationDismissed && routeInsight && (
+          <div className={styles.recommendationPanel}>
+            <div className={styles.recommendationTitle}>
+              <Zap size={24} fill="var(--color-primary)" />
+              AI Route Insight
+            </div>
+            
+            <div className={styles.recommendationDesc}>
+              <strong style={{ display: 'block', marginBottom: '8px', color: 'var(--color-text-primary)' }}>
+                {routeInsight.title}
+              </strong>
+              {routeInsight.description}
+            </div>
+
+            {routeInsight.potentialSaving && (
+              <div className={styles.savingsBadge}>
+                <Leaf size={14} />
+                Potential Saving: {routeInsight.potentialSaving}
+              </div>
+            )}
+
+            <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <button 
+                className={styles.applyButton}
+                onClick={handleApplyRecommendation}
+                disabled={isApplying}
+              >
+                {isApplying ? <Loader2 className="spin" size={20} /> : <CheckCircle2 size={20} />}
+                {isApplying ? 'Applying...' : 'Apply Optimized Route'}
+              </button>
+              <button 
+                className={styles.dismissButton}
+                onClick={() => setRecommendationDismissed(true)}
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -55,8 +55,14 @@ export const KpiCard = ({
 
   const TrendIcon = trendIcon;
 
+  // Set the CSS variable for the accent color
+  const accentColor = `var(--color-${colorType})`;
+
   return (
-    <div className={`gsap-card ${styles.card}`}>
+    <div 
+      className={`gsap-card ${styles.card}`} 
+      style={{ '--card-accent': accentColor } as React.CSSProperties}
+    >
       <div className={styles.header}>
         <div>
           <div className={styles.title}>{title}</div>
