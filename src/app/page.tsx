@@ -42,7 +42,7 @@ export default function DashboardPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef1 = useRef<HTMLDivElement>(null);
   const chartRef2 = useRef<HTMLDivElement>(null);
-  const { kpis } = useApp() as any;
+  const { kpis, insights } = useApp() as any;
 
   useAnimateCards(containerRef);
   useAnimateCharts(chartRef1);
@@ -50,15 +50,33 @@ export default function DashboardPage() {
 
   return (
     <div className={styles.dashboard} ref={containerRef}>
-      {/* ── Header ── */}
-      <div className={styles.header}>
-        <div>
-          <h1 className={styles.title}>Operational Overview</h1>
-          <p className={styles.subtitle}>Intelligence-driven insights for Nexus Supply Hub.</p>
+      {/* ── Dashboard Hero Header ── */}
+      <div className={styles.heroSection}>
+        <div className={styles.heroContent}>
+          <div className={styles.badgeRow}>
+            <div className={styles.liveBadge}>
+              <div className={styles.pulseDot} />
+              <span>LIVE SYSTEM TRAFFIC</span>
+            </div>
+            <div className={styles.aiBadge}>
+              <Zap size={10} fill="currentColor" />
+              <span>AI PREDICTIVE ENGINE ACTIVE</span>
+            </div>
+          </div>
+          <h1 className={styles.title}>Network Operations Command</h1>
+          <p className={styles.subtitle}>
+            Intelligence-driven insights for the Nexus global logistics hub.
+          </p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: 'var(--color-text-tertiary)' }}>
-          <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-secondary)', display: 'inline-block' }} />
-          Live · Last updated just now
+        <div className={styles.statusGroup}>
+          <div className={styles.statusItem}>
+            <span className={styles.statusLabel}>Connectivity</span>
+            <span className={styles.statusValue} style={{ color: 'var(--color-secondary)' }}>Stable</span>
+          </div>
+          <div className={styles.statusItem}>
+            <span className={styles.statusLabel}>Last Optimized</span>
+            <span className={styles.statusValue} style={{ color: 'var(--color-primary)' }}>Just Now</span>
+          </div>
         </div>
       </div>
 
@@ -163,12 +181,12 @@ export default function DashboardPage() {
             background: 'rgba(0,91,191,0.1)', color: 'var(--color-primary)',
             borderRadius: 'var(--radius-full)',
           }}>
-            {predictiveInsights.length} Active
+            {insights.length} Active
           </span>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {predictiveInsights.map((insight) => (
+          {insights.map((insight: any) => (
             <div
               key={insight.id}
               className="gsap-card"
@@ -178,7 +196,7 @@ export default function DashboardPage() {
                 padding: '20px 24px',
                 border: '1px solid var(--color-border)',
                 boxShadow: 'var(--shadow-card)',
-                ...severityStyle[insight.severity],
+                ...severityStyle[insight.severity as keyof typeof severityStyle],
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
@@ -188,7 +206,7 @@ export default function DashboardPage() {
                     <span style={{
                       fontSize: '0.65rem', fontWeight: 700, padding: '2px 8px',
                       borderRadius: 'var(--radius-full)', textTransform: 'uppercase',
-                      ...severityBadge[insight.severity],
+                      ...severityBadge[insight.severity as keyof typeof severityBadge],
                     }}>
                       {insight.severity}
                     </span>
