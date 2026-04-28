@@ -32,7 +32,29 @@ export const sendAiMessage = async (text: string, riskLevel: string = 'NORMAL'):
       let responseText = "I've analyzed the supply chain network. All primary nodes are functioning within expected parameters. How else can I assist?";
       let recommendation;
 
-      if (lowerText.includes('delay')) {
+      if (riskLevel === "CRITICAL" || lowerText.includes('critical-risk')) {
+        responseText = "🚨 Critical disruption detected. Immediate rerouting required.";
+        recommendation = {
+          title: "System Reroute",
+          description: "Initiate emergency rerouting.",
+          severity: "CRITICAL",
+          actionId: "reroute",
+          impact: "HIGH",
+          confidence: 98,
+          priority: "HIGH"
+        } as any;
+      } else if (riskLevel === "WARNING" || lowerText.includes('warning-risk')) {
+        responseText = "⚠️ Moderate risk detected. Optimization recommended.";
+        recommendation = {
+          title: "System Optimize",
+          description: "Apply optimization to clear warnings.",
+          severity: "WARNING",
+          actionId: "optimize",
+          impact: "MEDIUM",
+          confidence: 85,
+          priority: "MEDIUM"
+        } as any;
+      } else if (lowerText.includes('delay')) {
         responseText = "I've detected a significant delay forming at MDW-01. Current transit estimates suggest a 14-hour holdup.";
         recommendation = { 
           title: "Optimize MDW-01 Queue", 

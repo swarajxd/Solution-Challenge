@@ -131,11 +131,17 @@ export const NexusProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [simulationRiskExposure, incidents, isGlobalLoading]);
 
+  const [globalRiskLevel, setGlobalRiskLevel] = useState<GlobalRiskLevel>('NORMAL');
+
   // 5. Derived state for globalRiskLevel
-  const globalRiskLevel = useMemo<GlobalRiskLevel>(() => {
-    if (simulationRiskExposure > 25) return 'CRITICAL';
-    if (simulationRiskExposure > 14.5) return 'WARNING';
-    return 'NORMAL';
+  useEffect(() => {
+    if (simulationRiskExposure > 40) {
+      setGlobalRiskLevel("CRITICAL");
+    } else if (simulationRiskExposure > 25) {
+      setGlobalRiskLevel("WARNING");
+    } else {
+      setGlobalRiskLevel("NORMAL");
+    }
   }, [simulationRiskExposure]);
 
   // Toast controls via refs or timeouts
@@ -171,13 +177,19 @@ export const NexusProvider = ({ children }: { children: ReactNode }) => {
       return msg;
     }));
 
-    // Modify the exposure immediately
-    setSimulationRiskExposure(14.2);
+    if (actionId === "reroute") {
+      setSimulationRiskExposure(18);
+      // Remove critical incidents
+      setIncidents(prev => prev.filter(i => i.severity !== 'CRITICAL'));
+    } else if (actionId === "optimize") {
+      setSimulationRiskExposure(22);
+    } else {
+      // Fallback for other mock actions
+      setSimulationRiskExposure(14.2);
+      setIncidents(prev => prev.filter(i => i.severity !== 'CRITICAL'));
+    }
     
-    // Purge CRITICAL risks universally from the single source array!
-    setIncidents(prev => prev.filter(i => i.severity !== 'CRITICAL'));
-    
-    addNotification("AI recommendation applied successfully. Network updated.");
+    addNotification("AI action applied system-wide");
   };
 
   const runScenario = (scenarioId: string, impact: string, callback?: () => void) => {
@@ -199,13 +211,18 @@ export const NexusProvider = ({ children }: { children: ReactNode }) => {
         if (scenario.id === "demand-spike") setSimulationRiskExposure(32);
         if (scenario.id === "port-delay") {
           setSimulationRiskExposure(45);
-          setIncidents(prev => [{
-            id: generateId(),
-            severity: 'CRITICAL',
-            loc: 'Global Port Hub',
-            impact: 'Severe transit delays',
-            action: 'Pending Optimization'
-          } as RiskIncident, ...prev]);
+          setIncidents(prev => [
+            ...prev,
+            {
+              id: generateId(),
+              title: "Global Port Delay",
+              severity: "CRITICAL",
+              type: "DELAY",
+              loc: "Global Port Hub",
+              impact: "Severe transit delays",
+              action: "Pending Optimization"
+            } as RiskIncident
+          ]);
         }
         if (scenario.id === "fuel-cost") setSimulationRiskExposure(22);
 

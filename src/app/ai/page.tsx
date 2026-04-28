@@ -52,12 +52,38 @@ export default function AIAssistantPage() {
   }, [messages, isTyping]);
 
   // AUTO AI INTELLIGENCE ENGINE
+  const triggerAIEvent = async (type: string) => {
+    if (localTriggerRef.current.has(type)) return;
+    localTriggerRef.current.add(type);
+
+    setIsTyping(true);
+    try {
+      // Simulate typing delay before auto-message
+      await new Promise(resolve => setTimeout(resolve, 800));
+      const response = await sendAiMessage(type, globalRiskLevel);
+      setMessages(prev => [...prev, response]);
+      setAiTriggeredAlarms(prev => [...prev, { id: generateId(), type, timestamp: Date.now() }]);
+    } catch (err) {
+      console.error("AI trigger failed", err);
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
   useEffect(() => {
     if (isGlobalLoading) return;
 
     if (globalRiskLevel === 'NORMAL' && aiTriggeredAlarms.length > 0) {
       setAiTriggeredAlarms([]);
       localTriggerRef.current.clear();
+    }
+
+    if (globalRiskLevel === "CRITICAL") {
+      triggerAIEvent("critical-risk");
+    }
+
+    if (globalRiskLevel === "WARNING") {
+      triggerAIEvent("warning-risk");
     }
 
     // 1. Demand Spike Warning
